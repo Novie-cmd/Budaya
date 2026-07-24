@@ -1,0 +1,6 @@
+{
+  "name": "Dashboard Pendataan Kebudayaan",
+  "description": "Aplikasi Pendataan Kebudayaan Berbasis Spreadsheet & Dashboard Interaktif (Sanggar Seni, Seniman, Cagar Budaya, Koleksi Museum)",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
