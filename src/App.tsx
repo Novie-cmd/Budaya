@@ -224,6 +224,41 @@ export default function App() {
     logActivity('Hapus Master Item', 'Master Data', `Menghapus master item ID ${id}`);
   };
 
+  // User Management Handlers (Hak Akses)
+  const handleAddUser = (newUser: User) => {
+    setUserList((prev) => [...prev, newUser]);
+    logActivity(
+      'Tambah Pengguna',
+      'Sistem',
+      `Menambahkan akun pengguna baru ${newUser.name} (${newUser.role})`
+    );
+  };
+
+  const handleUpdateUser = (updatedUser: User) => {
+    setUserList((prev) =>
+      prev.map((u) => (u.id === updatedUser.id ? updatedUser : u))
+    );
+    // If the currently active user is the one edited, update the active session state too
+    if (currentUser.id === updatedUser.id) {
+      setCurrentUser(updatedUser);
+    }
+    logActivity(
+      'Ubah Pengguna',
+      'Sistem',
+      `Memperbarui data akun & hak akses ${updatedUser.name} (${updatedUser.role})`
+    );
+  };
+
+  const handleDeleteUser = (userId: string) => {
+    const targetUser = userList.find((u) => u.id === userId);
+    setUserList((prev) => prev.filter((u) => u.id !== userId));
+    logActivity(
+      'Hapus Pengguna',
+      'Sistem',
+      `Menghapus akun pengguna ${targetUser?.name || userId}`
+    );
+  };
+
   // Inspect Modal Trigger
   const handleViewDetail = (item: unknown, type: string) => {
     setSelectedDetailItem(item);
@@ -373,7 +408,9 @@ export default function App() {
             currentUser={currentUser}
             userList={userList}
             onRoleChange={handleRoleChange}
-            onAddUser={(nu) => setUserList((prev) => [...prev, nu])}
+            onAddUser={handleAddUser}
+            onUpdateUser={handleUpdateUser}
+            onDeleteUser={handleDeleteUser}
           />
         )}
 
