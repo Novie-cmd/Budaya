@@ -212,6 +212,39 @@ export default function App() {
     logActivity('Tambah Master Kategori Koleksi', 'Master Data', `Menambahkan Kategori Koleksi ${item.namaKategori}`);
   };
 
+  const handleEditKecamatan = (updated: MasterKecamatan) => {
+    const oldKecamatan = kecamatanList.find((k) => k.id === updated.id);
+    setKecamatanList((prev) => prev.map((k) => (k.id === updated.id ? updated : k)));
+    if (oldKecamatan && oldKecamatan.namaKecamatan !== updated.namaKecamatan) {
+      setDesaList((prev) =>
+        prev.map((d) =>
+          d.kecamatan === oldKecamatan.namaKecamatan ? { ...d, kecamatan: updated.namaKecamatan } : d
+        )
+      );
+    }
+    logActivity('Ubah Master Kecamatan', 'Master Data', `Mengubah Master Kecamatan ${updated.namaKecamatan} (${updated.id})`);
+  };
+
+  const handleEditDesa = (updated: MasterDesa) => {
+    setDesaList((prev) => prev.map((d) => (d.id === updated.id ? updated : d)));
+    logActivity('Ubah Master Desa', 'Master Data', `Mengubah Master Desa ${updated.namaDesa} (${updated.kecamatan})`);
+  };
+
+  const handleEditJenisSanggar = (updated: MasterJenisSanggar) => {
+    setJenisSanggarList((prev) => prev.map((j) => (j.id === updated.id ? updated : j)));
+    logActivity('Ubah Master Jenis Sanggar', 'Master Data', `Mengubah Jenis Sanggar ${updated.namaJenis}`);
+  };
+
+  const handleEditJenisSeniman = (updated: MasterJenisSeniman) => {
+    setJenisSenimanList((prev) => prev.map((j) => (j.id === updated.id ? updated : j)));
+    logActivity('Ubah Master Jenis Seniman', 'Master Data', `Mengubah Jenis Seniman ${updated.namaJenis}`);
+  };
+
+  const handleEditKategoriKoleksi = (updated: MasterKategoriKoleksi) => {
+    setKategoriKoleksiList((prev) => prev.map((k) => (k.id === updated.id ? updated : k)));
+    logActivity('Ubah Master Kategori Koleksi', 'Master Data', `Mengubah Kategori Koleksi ${updated.namaKategori}`);
+  };
+
   const handleDeleteMaster = (
     type: 'kecamatan' | 'desa' | 'sanggar' | 'seniman' | 'koleksi',
     id: string
@@ -378,6 +411,11 @@ export default function App() {
             onAddJenisSanggar={handleAddJenisSanggar}
             onAddJenisSeniman={handleAddJenisSeniman}
             onAddKategoriKoleksi={handleAddKategoriKoleksi}
+            onEditKecamatan={handleEditKecamatan}
+            onEditDesa={handleEditDesa}
+            onEditJenisSanggar={handleEditJenisSanggar}
+            onEditJenisSeniman={handleEditJenisSeniman}
+            onEditKategoriKoleksi={handleEditKategoriKoleksi}
             onDeleteMaster={handleDeleteMaster}
           />
         )}
