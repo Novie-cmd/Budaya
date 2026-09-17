@@ -27,6 +27,8 @@ import {
   Eye,
   Edit3,
   ExternalLink,
+  X,
+  Save,
 } from 'lucide-react';
 
 export type SheetTabName =
@@ -60,6 +62,11 @@ interface SpreadsheetViewProps {
   onDeleteRecord: (entityType: 'Sanggar' | 'Seniman' | 'Cagar' | 'Koleksi', id: string) => void;
   onViewDetail: (item: unknown, type: string) => void;
   onNavigateToForm: (type: 'Sanggar' | 'Seniman' | 'Cagar' | 'Koleksi') => void;
+  onUpdateSanggar?: (item: SanggarSeni) => void;
+  onUpdateSeniman?: (item: Seniman) => void;
+  onUpdateCagar?: (item: CagarBudaya) => void;
+  onUpdateKoleksi?: (item: KoleksiMuseum) => void;
+  onNavigateToMaster?: () => void;
 }
 
 export const SpreadsheetView: React.FC<SpreadsheetViewProps> = ({
@@ -79,9 +86,21 @@ export const SpreadsheetView: React.FC<SpreadsheetViewProps> = ({
   onDeleteRecord,
   onViewDetail,
   onNavigateToForm,
+  onUpdateSanggar,
+  onUpdateSeniman,
+  onUpdateCagar,
+  onUpdateKoleksi,
+  onNavigateToMaster,
 }) => {
   const [activeSheet, setActiveSheet] = useState<SheetTabName>('Database Sanggar');
   const [searchQuery, setSearchQuery] = useState('');
+  const [editingItem, setEditingItem] = useState<
+    | { type: 'Sanggar'; data: SanggarSeni }
+    | { type: 'Seniman'; data: Seniman }
+    | { type: 'Cagar'; data: CagarBudaya }
+    | { type: 'Koleksi'; data: KoleksiMuseum }
+    | null
+  >(null);
 
   const sheetsList: { name: SheetTabName; count: number; iconName: string }[] = [
     { name: 'Database Sanggar', count: sanggarList.length, iconName: '🎪' },
@@ -311,6 +330,15 @@ export const SpreadsheetView: React.FC<SpreadsheetViewProps> = ({
                             </button>
                           </>
                         )}
+                        {isCanEdit && onUpdateSanggar && (
+                          <button
+                            onClick={() => setEditingItem({ type: 'Sanggar', data: { ...s } })}
+                            className="p-1 text-amber-600 hover:bg-amber-50 rounded"
+                            title="Edit Data Sanggar"
+                          >
+                            <Edit3 className="w-4 h-4" />
+                          </button>
+                        )}
                         {isCanEdit && (
                           <button
                             onClick={() => onDeleteRecord('Sanggar', s.id)}
@@ -382,6 +410,15 @@ export const SpreadsheetView: React.FC<SpreadsheetViewProps> = ({
                             </button>
                           </>
                         )}
+                        {isCanEdit && onUpdateSeniman && (
+                          <button
+                            onClick={() => setEditingItem({ type: 'Seniman', data: { ...sn } })}
+                            className="p-1 text-amber-600 hover:bg-amber-50 rounded"
+                            title="Edit Data Seniman"
+                          >
+                            <Edit3 className="w-4 h-4" />
+                          </button>
+                        )}
                         {isCanEdit && (
                           <button onClick={() => onDeleteRecord('Seniman', sn.id)} className="p-1 text-rose-600 hover:bg-rose-50 rounded">
                             <Trash2 className="w-4 h-4" />
@@ -435,6 +472,15 @@ export const SpreadsheetView: React.FC<SpreadsheetViewProps> = ({
                         <button onClick={() => onViewDetail(c, 'Cagar')} className="p-1 text-blue-600 hover:bg-blue-50 rounded">
                           <Eye className="w-4 h-4" />
                         </button>
+                        {isCanEdit && onUpdateCagar && (
+                          <button
+                            onClick={() => setEditingItem({ type: 'Cagar', data: { ...c } })}
+                            className="p-1 text-amber-600 hover:bg-amber-50 rounded"
+                            title="Edit Data Cagar Budaya"
+                          >
+                            <Edit3 className="w-4 h-4" />
+                          </button>
+                        )}
                         {isCanEdit && (
                           <button onClick={() => onDeleteRecord('Cagar', c.id)} className="p-1 text-rose-600 hover:bg-rose-50 rounded">
                             <Trash2 className="w-4 h-4" />
@@ -486,6 +532,15 @@ export const SpreadsheetView: React.FC<SpreadsheetViewProps> = ({
                         <button onClick={() => onViewDetail(kl, 'Koleksi')} className="p-1 text-blue-600 hover:bg-blue-50 rounded">
                           <Eye className="w-4 h-4" />
                         </button>
+                        {isCanEdit && onUpdateKoleksi && (
+                          <button
+                            onClick={() => setEditingItem({ type: 'Koleksi', data: { ...kl } })}
+                            className="p-1 text-amber-600 hover:bg-amber-50 rounded"
+                            title="Edit Data Koleksi Museum"
+                          >
+                            <Edit3 className="w-4 h-4" />
+                          </button>
+                        )}
                         {isCanEdit && (
                           <button onClick={() => onDeleteRecord('Koleksi', kl.id)} className="p-1 text-rose-600 hover:bg-rose-50 rounded">
                             <Trash2 className="w-4 h-4" />
@@ -686,6 +741,697 @@ export const SpreadsheetView: React.FC<SpreadsheetViewProps> = ({
 
         </div>
       </div>
+
+      {/* Quick Edit Modal for Spreadsheet Records */}
+      {editingItem && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6 shadow-2xl space-y-4 text-xs text-slate-700">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-200">
+              <div className="flex items-center gap-2">
+                <div className="p-2 bg-amber-100 text-amber-800 rounded-lg font-bold">
+                  <Edit3 className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-sm text-slate-900">
+                    Edit Data {editingItem.type}
+                  </h3>
+                  <span className="text-[11px] text-slate-500 font-mono">
+                    ID Record: {editingItem.data.id}
+                  </span>
+                </div>
+              </div>
+              <button
+                onClick={() => setEditingItem(null)}
+                className="p-1 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* FORM: Edit Sanggar */}
+            {editingItem.type === 'Sanggar' && (
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  if (onUpdateSanggar) {
+                    onUpdateSanggar(editingItem.data as SanggarSeni);
+                  }
+                  setEditingItem(null);
+                }}
+                className="space-y-3"
+              >
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div>
+                    <label className="font-semibold text-slate-700 block mb-1">Nama Sanggar *</label>
+                    <input
+                      type="text"
+                      required
+                      value={editingItem.data.namaSanggar}
+                      onChange={(e) =>
+                        setEditingItem({
+                          ...editingItem,
+                          data: { ...editingItem.data, namaSanggar: e.target.value },
+                        })
+                      }
+                      className="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="font-semibold text-slate-700 block mb-1">Jenis Sanggar *</label>
+                    <select
+                      value={editingItem.data.jenisSanggar}
+                      onChange={(e) =>
+                        setEditingItem({
+                          ...editingItem,
+                          data: { ...editingItem.data, jenisSanggar: e.target.value },
+                        })
+                      }
+                      className="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500"
+                    >
+                      {jenisSanggarList.map((js) => (
+                        <option key={js.id} value={js.namaJenis}>
+                          {js.namaJenis}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="font-semibold text-slate-700 block mb-1">Nama Pimpinan *</label>
+                    <input
+                      type="text"
+                      required
+                      value={editingItem.data.namaPimpinan}
+                      onChange={(e) =>
+                        setEditingItem({
+                          ...editingItem,
+                          data: { ...editingItem.data, namaPimpinan: e.target.value },
+                        })
+                      }
+                      className="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="font-semibold text-slate-700 block mb-1">Nomor HP</label>
+                    <input
+                      type="text"
+                      value={editingItem.data.nomorHp}
+                      onChange={(e) =>
+                        setEditingItem({
+                          ...editingItem,
+                          data: { ...editingItem.data, nomorHp: e.target.value },
+                        })
+                      }
+                      className="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="font-semibold text-slate-700 block mb-1">Kecamatan *</label>
+                    <select
+                      value={editingItem.data.kecamatan}
+                      onChange={(e) => {
+                        const newKec = e.target.value;
+                        const matchingDesa = desaList.find((d) => d.kecamatan === newKec);
+                        setEditingItem({
+                          ...editingItem,
+                          data: {
+                            ...editingItem.data,
+                            kecamatan: newKec,
+                            desa: matchingDesa ? matchingDesa.namaDesa : '',
+                          },
+                        });
+                      }}
+                      className="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500"
+                    >
+                      {kecamatanList.map((k) => (
+                        <option key={k.id} value={k.namaKecamatan}>
+                          {k.namaKecamatan}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="font-semibold text-slate-700 block mb-1">Desa / Kelurahan *</label>
+                    <select
+                      value={editingItem.data.desa}
+                      onChange={(e) =>
+                        setEditingItem({
+                          ...editingItem,
+                          data: { ...editingItem.data, desa: e.target.value },
+                        })
+                      }
+                      className="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500"
+                    >
+                      {desaList
+                        .filter((d) => !editingItem.data.kecamatan || d.kecamatan === editingItem.data.kecamatan)
+                        .map((d) => (
+                          <option key={d.id} value={d.namaDesa}>
+                            {d.namaDesa}
+                          </option>
+                        ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="font-semibold text-slate-700 block mb-1">Jumlah Anggota</label>
+                    <input
+                      type="number"
+                      min="1"
+                      value={editingItem.data.jumlahAnggota}
+                      onChange={(e) =>
+                        setEditingItem({
+                          ...editingItem,
+                          data: { ...editingItem.data, jumlahAnggota: Number(e.target.value) || 0 },
+                        })
+                      }
+                      className="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="font-semibold text-slate-700 block mb-1">Status Verifikasi</label>
+                    <select
+                      value={editingItem.data.statusVerifikasi}
+                      onChange={(e) =>
+                        setEditingItem({
+                          ...editingItem,
+                          data: {
+                            ...editingItem.data,
+                            statusVerifikasi: e.target.value as 'Terverifikasi' | 'Menunggu Verifikasi' | 'Ditolak',
+                          },
+                        })
+                      }
+                      className="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500"
+                    >
+                      <option value="Terverifikasi">Terverifikasi</option>
+                      <option value="Menunggu Verifikasi">Menunggu Verifikasi</option>
+                      <option value="Ditolak">Ditolak</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="font-semibold text-slate-700 block mb-1">Alamat Lengkap</label>
+                  <input
+                    type="text"
+                    value={editingItem.data.alamat}
+                    onChange={(e) =>
+                      setEditingItem({
+                        ...editingItem,
+                        data: { ...editingItem.data, alamat: e.target.value },
+                      })
+                    }
+                    className="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500"
+                  />
+                </div>
+
+                <div className="flex justify-end gap-2 pt-3 border-t border-slate-200">
+                  <button
+                    type="button"
+                    onClick={() => setEditingItem(null)}
+                    className="px-4 py-2 border border-slate-300 text-slate-700 hover:bg-slate-100 rounded-lg font-semibold"
+                  >
+                    Batal
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg font-semibold flex items-center gap-1.5 shadow-xs"
+                  >
+                    <Save className="w-4 h-4" />
+                    Simpan Perubahan
+                  </button>
+                </div>
+              </form>
+            )}
+
+            {/* FORM: Edit Seniman */}
+            {editingItem.type === 'Seniman' && (
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  if (onUpdateSeniman) {
+                    onUpdateSeniman(editingItem.data as Seniman);
+                  }
+                  setEditingItem(null);
+                }}
+                className="space-y-3"
+              >
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div>
+                    <label className="font-semibold text-slate-700 block mb-1">Nama Lengkap *</label>
+                    <input
+                      type="text"
+                      required
+                      value={editingItem.data.namaLengkap}
+                      onChange={(e) =>
+                        setEditingItem({
+                          ...editingItem,
+                          data: { ...editingItem.data, namaLengkap: e.target.value },
+                        })
+                      }
+                      className="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="font-semibold text-slate-700 block mb-1">NIK (16 Digit)</label>
+                    <input
+                      type="text"
+                      value={editingItem.data.nik}
+                      onChange={(e) =>
+                        setEditingItem({
+                          ...editingItem,
+                          data: { ...editingItem.data, nik: e.target.value },
+                        })
+                      }
+                      className="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 font-mono"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="font-semibold text-slate-700 block mb-1">Jenis Seniman *</label>
+                    <select
+                      value={editingItem.data.jenisSeniman}
+                      onChange={(e) =>
+                        setEditingItem({
+                          ...editingItem,
+                          data: { ...editingItem.data, jenisSeniman: e.target.value },
+                        })
+                      }
+                      className="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                    >
+                      {jenisSenimanList.map((js) => (
+                        <option key={js.id} value={js.namaJenis}>
+                          {js.namaJenis}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="font-semibold text-slate-700 block mb-1">Sanggar Naungan</label>
+                    <input
+                      type="text"
+                      value={editingItem.data.sanggar}
+                      onChange={(e) =>
+                        setEditingItem({
+                          ...editingItem,
+                          data: { ...editingItem.data, sanggar: e.target.value },
+                        })
+                      }
+                      className="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="font-semibold text-slate-700 block mb-1">Kecamatan</label>
+                    <select
+                      value={editingItem.data.kecamatan}
+                      onChange={(e) => {
+                        const newKec = e.target.value;
+                        const matchingDesa = desaList.find((d) => d.kecamatan === newKec);
+                        setEditingItem({
+                          ...editingItem,
+                          data: {
+                            ...editingItem.data,
+                            kecamatan: newKec,
+                            desa: matchingDesa ? matchingDesa.namaDesa : '',
+                          },
+                        });
+                      }}
+                      className="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                    >
+                      {kecamatanList.map((k) => (
+                        <option key={k.id} value={k.namaKecamatan}>
+                          {k.namaKecamatan}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="font-semibold text-slate-700 block mb-1">Desa / Kelurahan</label>
+                    <select
+                      value={editingItem.data.desa}
+                      onChange={(e) =>
+                        setEditingItem({
+                          ...editingItem,
+                          data: { ...editingItem.data, desa: e.target.value },
+                        })
+                      }
+                      className="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                    >
+                      {desaList
+                        .filter((d) => !editingItem.data.kecamatan || d.kecamatan === editingItem.data.kecamatan)
+                        .map((d) => (
+                          <option key={d.id} value={d.namaDesa}>
+                            {d.namaDesa}
+                          </option>
+                        ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="font-semibold text-slate-700 block mb-1">Nomor HP</label>
+                    <input
+                      type="text"
+                      value={editingItem.data.nomorHp}
+                      onChange={(e) =>
+                        setEditingItem({
+                          ...editingItem,
+                          data: { ...editingItem.data, nomorHp: e.target.value },
+                        })
+                      }
+                      className="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="font-semibold text-slate-700 block mb-1">Sertifikasi Kompetensi</label>
+                    <select
+                      value={editingItem.data.sertifikasi}
+                      onChange={(e) =>
+                        setEditingItem({
+                          ...editingItem,
+                          data: {
+                            ...editingItem.data,
+                            sertifikasi: e.target.value as 'Ya' | 'Tidak',
+                          },
+                        })
+                      }
+                      className="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                    >
+                      <option value="Ya">Ya (Tersertifikasi)</option>
+                      <option value="Tidak">Tidak</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="flex justify-end gap-2 pt-3 border-t border-slate-200">
+                  <button
+                    type="button"
+                    onClick={() => setEditingItem(null)}
+                    className="px-4 py-2 border border-slate-300 text-slate-700 hover:bg-slate-100 rounded-lg font-semibold"
+                  >
+                    Batal
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-semibold flex items-center gap-1.5 shadow-xs"
+                  >
+                    <Save className="w-4 h-4" />
+                    Simpan Perubahan
+                  </button>
+                </div>
+              </form>
+            )}
+
+            {/* FORM: Edit Cagar Budaya */}
+            {editingItem.type === 'Cagar' && (
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  if (onUpdateCagar) {
+                    onUpdateCagar(editingItem.data as CagarBudaya);
+                  }
+                  setEditingItem(null);
+                }}
+                className="space-y-3"
+              >
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div>
+                    <label className="font-semibold text-slate-700 block mb-1">Nama Cagar Budaya *</label>
+                    <input
+                      type="text"
+                      required
+                      value={editingItem.data.namaCagar}
+                      onChange={(e) =>
+                        setEditingItem({
+                          ...editingItem,
+                          data: { ...editingItem.data, namaCagar: e.target.value },
+                        })
+                      }
+                      className="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="font-semibold text-slate-700 block mb-1">Jenis Cagar *</label>
+                    <select
+                      value={editingItem.data.jenisCagar}
+                      onChange={(e) =>
+                        setEditingItem({
+                          ...editingItem,
+                          data: {
+                            ...editingItem.data,
+                            jenisCagar: e.target.value as 'Benda' | 'Bangunan' | 'Struktur' | 'Situs' | 'Kawasan',
+                          },
+                        })
+                      }
+                      className="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="Situs">Situs</option>
+                      <option value="Bangunan">Bangunan</option>
+                      <option value="Struktur">Struktur</option>
+                      <option value="Benda">Benda</option>
+                      <option value="Kawasan">Kawasan</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="font-semibold text-slate-700 block mb-1">Tingkat Penetapan *</label>
+                    <select
+                      value={editingItem.data.tingkat}
+                      onChange={(e) =>
+                        setEditingItem({
+                          ...editingItem,
+                          data: {
+                            ...editingItem.data,
+                            tingkat: e.target.value as 'Kabupaten' | 'Provinsi' | 'Nasional',
+                          },
+                        })
+                      }
+                      className="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="Kabupaten">Kabupaten / Kota</option>
+                      <option value="Provinsi">Provinsi NTB</option>
+                      <option value="Nasional">Nasional</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="font-semibold text-slate-700 block mb-1">Nomor SK</label>
+                    <input
+                      type="text"
+                      value={editingItem.data.nomorSk}
+                      onChange={(e) =>
+                        setEditingItem({
+                          ...editingItem,
+                          data: { ...editingItem.data, nomorSk: e.target.value },
+                        })
+                      }
+                      className="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 font-mono text-xs"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="font-semibold text-slate-700 block mb-1">Kondisi Saat Ini</label>
+                    <select
+                      value={editingItem.data.kondisi}
+                      onChange={(e) =>
+                        setEditingItem({
+                          ...editingItem,
+                          data: {
+                            ...editingItem.data,
+                            kondisi: e.target.value as 'Baik' | 'Rusak Ringan' | 'Rusak Berat',
+                          },
+                        })
+                      }
+                      className="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="Baik">Baik</option>
+                      <option value="Rusak Ringan">Rusak Ringan</option>
+                      <option value="Rusak Berat">Rusak Berat</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="font-semibold text-slate-700 block mb-1">Kepemilikan</label>
+                    <input
+                      type="text"
+                      value={editingItem.data.kepemilikan}
+                      onChange={(e) =>
+                        setEditingItem({
+                          ...editingItem,
+                          data: { ...editingItem.data, kepemilikan: e.target.value },
+                        })
+                      }
+                      className="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex justify-end gap-2 pt-3 border-t border-slate-200">
+                  <button
+                    type="button"
+                    onClick={() => setEditingItem(null)}
+                    className="px-4 py-2 border border-slate-300 text-slate-700 hover:bg-slate-100 rounded-lg font-semibold"
+                  >
+                    Batal
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold flex items-center gap-1.5 shadow-xs"
+                  >
+                    <Save className="w-4 h-4" />
+                    Simpan Perubahan
+                  </button>
+                </div>
+              </form>
+            )}
+
+            {/* FORM: Edit Koleksi Museum */}
+            {editingItem.type === 'Koleksi' && (
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  if (onUpdateKoleksi) {
+                    onUpdateKoleksi(editingItem.data as KoleksiMuseum);
+                  }
+                  setEditingItem(null);
+                }}
+                className="space-y-3"
+              >
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div>
+                    <label className="font-semibold text-slate-700 block mb-1">Nama Koleksi *</label>
+                    <input
+                      type="text"
+                      required
+                      value={editingItem.data.namaKoleksi}
+                      onChange={(e) =>
+                        setEditingItem({
+                          ...editingItem,
+                          data: { ...editingItem.data, namaKoleksi: e.target.value },
+                        })
+                      }
+                      className="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="font-semibold text-slate-700 block mb-1">No. Inventaris *</label>
+                    <input
+                      type="text"
+                      required
+                      value={editingItem.data.nomorInventaris}
+                      onChange={(e) =>
+                        setEditingItem({
+                          ...editingItem,
+                          data: { ...editingItem.data, nomorInventaris: e.target.value },
+                        })
+                      }
+                      className="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-purple-500 font-mono text-xs"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="font-semibold text-slate-700 block mb-1">Kategori Koleksi</label>
+                    <select
+                      value={editingItem.data.kategori}
+                      onChange={(e) =>
+                        setEditingItem({
+                          ...editingItem,
+                          data: { ...editingItem.data, kategori: e.target.value },
+                        })
+                      }
+                      className="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                    >
+                      {kategoriKoleksiList.map((kat) => (
+                        <option key={kat.id} value={kat.namaKategori}>
+                          {kat.namaKategori}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="font-semibold text-slate-700 block mb-1">Kondisi</label>
+                    <select
+                      value={editingItem.data.kondisi}
+                      onChange={(e) =>
+                        setEditingItem({
+                          ...editingItem,
+                          data: {
+                            ...editingItem.data,
+                            kondisi: e.target.value as 'Baik' | 'Rusak Ringan' | 'Rusak Berat',
+                          },
+                        })
+                      }
+                      className="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                    >
+                      <option value="Baik">Baik</option>
+                      <option value="Rusak Ringan">Rusak Ringan</option>
+                      <option value="Rusak Berat">Rusak Berat</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="font-semibold text-slate-700 block mb-1">Asal Koleksi</label>
+                    <input
+                      type="text"
+                      value={editingItem.data.asalKoleksi}
+                      onChange={(e) =>
+                        setEditingItem({
+                          ...editingItem,
+                          data: { ...editingItem.data, asalKoleksi: e.target.value },
+                        })
+                      }
+                      className="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="font-semibold text-slate-700 block mb-1">Lokasi Penyimpanan</label>
+                    <input
+                      type="text"
+                      value={editingItem.data.lokasiPenyimpanan}
+                      onChange={(e) =>
+                        setEditingItem({
+                          ...editingItem,
+                          data: { ...editingItem.data, lokasiPenyimpanan: e.target.value },
+                        })
+                      }
+                      className="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex justify-end gap-2 pt-3 border-t border-slate-200">
+                  <button
+                    type="button"
+                    onClick={() => setEditingItem(null)}
+                    className="px-4 py-2 border border-slate-300 text-slate-700 hover:bg-slate-100 rounded-lg font-semibold"
+                  >
+                    Batal
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-semibold flex items-center gap-1.5 shadow-xs"
+                  >
+                    <Save className="w-4 h-4" />
+                    Simpan Perubahan
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
+        </div>
+      )}
 
     </div>
   );

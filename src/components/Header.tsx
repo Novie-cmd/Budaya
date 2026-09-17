@@ -1,6 +1,6 @@
 import React from 'react';
 import { Role, User } from '../types';
-import { Database, Shield, UserCheck, Search, Sparkles, RefreshCw } from 'lucide-react';
+import { Database, Shield, Search, RefreshCw, CheckCircle2, RotateCcw } from 'lucide-react';
 
 interface HeaderProps {
   currentUser: User;
@@ -11,6 +11,7 @@ interface HeaderProps {
   onSyncSheets: () => void;
   isSyncing: boolean;
   lastSynced: string;
+  onResetDefault?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -22,6 +23,7 @@ export const Header: React.FC<HeaderProps> = ({
   onSyncSheets,
   isSyncing,
   lastSynced,
+  onResetDefault,
 }) => {
   const roleColors: Record<Role, string> = {
     Administrator: 'bg-rose-100 text-rose-800 border-rose-300',
@@ -67,9 +69,30 @@ export const Header: React.FC<HeaderProps> = ({
             </div>
           </div>
 
-          {/* Right Action Controls: Sync & Role Switcher */}
-          <div className="flex items-center justify-between md:justify-end gap-3 text-xs">
+          {/* Right Action Controls: Sync, Auto-Save Status, Reset, & Role Switcher */}
+          <div className="flex items-center justify-between md:justify-end gap-2.5 text-xs">
             
+            {/* Auto-Save Persistent Status Badge */}
+            <div
+              title="Perubahan data & hasil edit disimpan otomatis di browser (LocalStorage)"
+              className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 bg-emerald-950/70 border border-emerald-500/40 text-emerald-300 rounded-lg text-[11px] font-medium shadow-xs"
+            >
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+              <span>Tersimpan Otomatis</span>
+            </div>
+
+            {/* Reset to Default Data Button */}
+            {onResetDefault && (
+              <button
+                onClick={onResetDefault}
+                title="Atur ulang seluruh data ke setelan bawaan sistem"
+                className="flex items-center gap-1 px-2.5 py-1.5 bg-slate-800 hover:bg-rose-950/60 text-slate-300 hover:text-rose-300 rounded-lg border border-slate-700 hover:border-rose-800/60 transition-colors text-[11px]"
+              >
+                <RotateCcw className="w-3.5 h-3.5" />
+                <span className="hidden md:inline">Reset Default</span>
+              </button>
+            )}
+
             {/* Sync Button */}
             <button
               onClick={onSyncSheets}

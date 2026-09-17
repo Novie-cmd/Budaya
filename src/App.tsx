@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Role,
   User,
@@ -27,6 +27,12 @@ import {
   INITIAL_USERS,
   INITIAL_LOGS,
 } from './data/initialData';
+import {
+  loadFromStorage,
+  saveToStorage,
+  clearAllAppData,
+  STORAGE_KEYS,
+} from './utils/storage';
 import { Header } from './components/Header';
 import { Navigation, MainTab } from './components/Navigation';
 import { DashboardOverview } from './components/DashboardOverview';
@@ -45,27 +51,106 @@ export default function App() {
   const [activeTab, setActiveTab] = useState<MainTab>('dashboard');
   const [formType, setFormType] = useState<'Sanggar' | 'Seniman' | 'Cagar' | 'Koleksi'>('Sanggar');
 
-  // Master Data State
-  const [kecamatanList, setKecamatanList] = useState<MasterKecamatan[]>(INITIAL_KECAMATAN);
-  const [desaList, setDesaList] = useState<MasterDesa[]>(INITIAL_DESA);
-  const [jenisSanggarList, setJenisSanggarList] = useState<MasterJenisSanggar[]>(INITIAL_JENIS_SANGGAR);
-  const [jenisSenimanList, setJenisSenimanList] = useState<MasterJenisSeniman[]>(INITIAL_JENIS_SENIMAN);
-  const [kategoriKoleksiList, setKategoriKoleksiList] = useState<MasterKategoriKoleksi[]>(INITIAL_KATEGORI_KOLEKSI);
+  // Master Data State (Persisted in LocalStorage)
+  const [kecamatanList, setKecamatanList] = useState<MasterKecamatan[]>(() =>
+    loadFromStorage(STORAGE_KEYS.KECAMATAN, INITIAL_KECAMATAN)
+  );
+  const [desaList, setDesaList] = useState<MasterDesa[]>(() =>
+    loadFromStorage(STORAGE_KEYS.DESA, INITIAL_DESA)
+  );
+  const [jenisSanggarList, setJenisSanggarList] = useState<MasterJenisSanggar[]>(() =>
+    loadFromStorage(STORAGE_KEYS.JENIS_SANGGAR, INITIAL_JENIS_SANGGAR)
+  );
+  const [jenisSenimanList, setJenisSenimanList] = useState<MasterJenisSeniman[]>(() =>
+    loadFromStorage(STORAGE_KEYS.JENIS_SENIMAN, INITIAL_JENIS_SENIMAN)
+  );
+  const [kategoriKoleksiList, setKategoriKoleksiList] = useState<MasterKategoriKoleksi[]>(() =>
+    loadFromStorage(STORAGE_KEYS.KATEGORI_KOLEKSI, INITIAL_KATEGORI_KOLEKSI)
+  );
 
-  // Cultural Entities Database State
-  const [sanggarList, setSanggarList] = useState<SanggarSeni[]>(INITIAL_SANGGAR);
-  const [senimanList, setSenimanList] = useState<Seniman[]>(INITIAL_SENIMAN);
-  const [cagarList, setCagarList] = useState<CagarBudaya[]>(INITIAL_CAGAR_BUDAYA);
-  const [koleksiList, setKoleksiList] = useState<KoleksiMuseum[]>(INITIAL_KOLEKSI_MUSEUM);
+  // Cultural Entities Database State (Persisted in LocalStorage)
+  const [sanggarList, setSanggarList] = useState<SanggarSeni[]>(() =>
+    loadFromStorage(STORAGE_KEYS.SANGGAR, INITIAL_SANGGAR)
+  );
+  const [senimanList, setSenimanList] = useState<Seniman[]>(() =>
+    loadFromStorage(STORAGE_KEYS.SENIMAN, INITIAL_SENIMAN)
+  );
+  const [cagarList, setCagarList] = useState<CagarBudaya[]>(() =>
+    loadFromStorage(STORAGE_KEYS.CAGAR, INITIAL_CAGAR_BUDAYA)
+  );
+  const [koleksiList, setKoleksiList] = useState<KoleksiMuseum[]>(() =>
+    loadFromStorage(STORAGE_KEYS.KOLEKSI, INITIAL_KOLEKSI_MUSEUM)
+  );
 
-  // User & Log State
-  const [userList, setUserList] = useState<User[]>(INITIAL_USERS);
-  const [currentUser, setCurrentUser] = useState<User>(INITIAL_USERS[0]); // Default Administrator
-  const [activityLogs, setActivityLogs] = useState<ActivityLog[]>(INITIAL_LOGS);
+  // User & Log State (Persisted in LocalStorage)
+  const [userList, setUserList] = useState<User[]>(() =>
+    loadFromStorage(STORAGE_KEYS.USERS, INITIAL_USERS)
+  );
+  const [currentUser, setCurrentUser] = useState<User>(() =>
+    loadFromStorage(STORAGE_KEYS.CURRENT_USER, INITIAL_USERS[0])
+  );
+  const [activityLogs, setActivityLogs] = useState<ActivityLog[]>(() =>
+    loadFromStorage(STORAGE_KEYS.ACTIVITY_LOGS, INITIAL_LOGS)
+  );
 
-  // Sync state
+  // Sync state (Persisted in LocalStorage)
   const [isSyncing, setIsSyncing] = useState(false);
-  const [lastSynced, setLastSynced] = useState('2026-07-23 22:45');
+  const [lastSynced, setLastSynced] = useState<string>(() =>
+    loadFromStorage(STORAGE_KEYS.LAST_SYNCED, '2026-07-23 22:45')
+  );
+
+  // Auto-Save Effect Hooks: Persist any edits immediately
+  useEffect(() => {
+    saveToStorage(STORAGE_KEYS.KECAMATAN, kecamatanList);
+  }, [kecamatanList]);
+
+  useEffect(() => {
+    saveToStorage(STORAGE_KEYS.DESA, desaList);
+  }, [desaList]);
+
+  useEffect(() => {
+    saveToStorage(STORAGE_KEYS.JENIS_SANGGAR, jenisSanggarList);
+  }, [jenisSanggarList]);
+
+  useEffect(() => {
+    saveToStorage(STORAGE_KEYS.JENIS_SENIMAN, jenisSenimanList);
+  }, [jenisSenimanList]);
+
+  useEffect(() => {
+    saveToStorage(STORAGE_KEYS.KATEGORI_KOLEKSI, kategoriKoleksiList);
+  }, [kategoriKoleksiList]);
+
+  useEffect(() => {
+    saveToStorage(STORAGE_KEYS.SANGGAR, sanggarList);
+  }, [sanggarList]);
+
+  useEffect(() => {
+    saveToStorage(STORAGE_KEYS.SENIMAN, senimanList);
+  }, [senimanList]);
+
+  useEffect(() => {
+    saveToStorage(STORAGE_KEYS.CAGAR, cagarList);
+  }, [cagarList]);
+
+  useEffect(() => {
+    saveToStorage(STORAGE_KEYS.KOLEKSI, koleksiList);
+  }, [koleksiList]);
+
+  useEffect(() => {
+    saveToStorage(STORAGE_KEYS.USERS, userList);
+  }, [userList]);
+
+  useEffect(() => {
+    saveToStorage(STORAGE_KEYS.CURRENT_USER, currentUser);
+  }, [currentUser]);
+
+  useEffect(() => {
+    saveToStorage(STORAGE_KEYS.ACTIVITY_LOGS, activityLogs);
+  }, [activityLogs]);
+
+  useEffect(() => {
+    saveToStorage(STORAGE_KEYS.LAST_SYNCED, lastSynced);
+  }, [lastSynced]);
 
   // Global Filter State
   const [filters, setFilters] = useState<CulturalFilters>({
@@ -145,6 +230,56 @@ export default function App() {
   const handleAddKoleksi = (item: KoleksiMuseum) => {
     setKoleksiList((prev) => [item, ...prev]);
     logActivity('Tambah Koleksi Museum', 'Koleksi Museum', `Menambahkan Koleksi ${item.namaKoleksi} (${item.id})`);
+  };
+
+  // Update Record Handlers for Cultural Data
+  const handleUpdateSanggar = (updated: SanggarSeni) => {
+    setSanggarList((prev) => prev.map((s) => (s.id === updated.id ? updated : s)));
+    logActivity('Ubah Sanggar Seni', 'Sanggar', `Memperbarui data Sanggar ${updated.namaSanggar} (${updated.id})`);
+  };
+
+  const handleUpdateSeniman = (updated: Seniman) => {
+    setSenimanList((prev) => prev.map((sn) => (sn.id === updated.id ? updated : sn)));
+    logActivity('Ubah Seniman', 'Seniman', `Memperbarui data Seniman ${updated.namaLengkap} (${updated.id})`);
+  };
+
+  const handleUpdateCagar = (updated: CagarBudaya) => {
+    setCagarList((prev) => prev.map((c) => (c.id === updated.id ? updated : c)));
+    logActivity('Ubah Cagar Budaya', 'Cagar Budaya', `Memperbarui data Cagar Budaya ${updated.namaCagar} (${updated.id})`);
+  };
+
+  const handleUpdateKoleksi = (updated: KoleksiMuseum) => {
+    setKoleksiList((prev) => prev.map((k) => (k.id === updated.id ? updated : k)));
+    logActivity('Ubah Koleksi Museum', 'Koleksi Museum', `Memperbarui data Koleksi Museum ${updated.namaKoleksi} (${updated.id})`);
+  };
+
+  // Reset to Default Initial Dataset
+  const handleResetToDefault = () => {
+    if (
+      window.confirm(
+        'Apakah Anda yakin ingin mengatur ulang semua data ke data awal bawaan sistem? Semua editan dan penambahan baru akan dikembalikan ke data default.'
+      )
+    ) {
+      clearAllAppData();
+      setKecamatanList(INITIAL_KECAMATAN);
+      setDesaList(INITIAL_DESA);
+      setJenisSanggarList(INITIAL_JENIS_SANGGAR);
+      setJenisSenimanList(INITIAL_JENIS_SENIMAN);
+      setKategoriKoleksiList(INITIAL_KATEGORI_KOLEKSI);
+      setSanggarList(INITIAL_SANGGAR);
+      setSenimanList(INITIAL_SENIMAN);
+      setCagarList(INITIAL_CAGAR_BUDAYA);
+      setKoleksiList(INITIAL_KOLEKSI_MUSEUM);
+      setUserList(INITIAL_USERS);
+      setCurrentUser(INITIAL_USERS[0]);
+      setActivityLogs(INITIAL_LOGS);
+      setLastSynced('2026-07-23 22:45');
+      logActivity(
+        'Reset Data Default',
+        'Sistem',
+        'Mengembalikan seluruh data master & kebudayaan ke setelan bawaan sistem'
+      );
+    }
   };
 
   // Verification Handler
@@ -371,6 +506,11 @@ export default function App() {
             onVerifyRecord={handleVerifyRecord}
             onDeleteRecord={handleDeleteRecord}
             onViewDetail={handleViewDetail}
+            onUpdateSanggar={handleUpdateSanggar}
+            onUpdateSeniman={handleUpdateSeniman}
+            onUpdateCagar={handleUpdateCagar}
+            onUpdateKoleksi={handleUpdateKoleksi}
+            onNavigateToMaster={() => setActiveTab('master')}
             onNavigateToForm={(type) => {
               setFormType(type);
               setActiveTab('forms');
